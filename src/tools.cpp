@@ -15,36 +15,35 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
     * Calculate the RMSE here.
   */
   VectorXd rmse(4);
-    rmse << 0,0,0,0;
+  rmse << 0,0,0,0;
 
-    if(estimations.size() < 1) {
-      throw std::invalid_argument( "Error: Estimation vector size should not be zero");
-    }
-    else if(estimations.size() != ground_truth.size()) {
-      throw std::invalid_argument( "Error: Estimation vector size should equal ground truth size");
-    } else {
-      //accumulate squared residuals
-      for(int i=0; i < estimations.size(); ++i){
-        VectorXd current_estimate = estimations[i];
-        VectorXd cur_ground_truth = ground_truth[i];
-        VectorXd residual = current_estimate - cur_ground_truth;
-        for(int j=0; j<residual.size(); ++j) {
-          residual[j] = residual[j] * residual[j];
-        }
-        rmse += residual;
-      }
-
-      //calculate the mean
-      rmse /= estimations.size();
-
-      //calculate the squared root
-      for(int i=0; i<rmse.size(); ++i) {
-          rmse[i] = sqrt(rmse[i]);
-      }
-
-      //return the result
-      return rmse;
+  // check the validity of the following inputs:
+  //  * the estimation vector size should not be zero
+  //  * the estimation vector size should equal ground truth vector size
+  if(estimations.size() != ground_truth.size()
+      || estimations.size() == 0){
+    cout << "Invalid estimation or ground_truth data" << endl;
+    return rmse;
   }
+
+  //accumulate squared residuals
+  for(unsigned int i=0; i < estimations.size(); ++i){
+
+    VectorXd residual = estimations[i] - ground_truth[i];
+
+    //coefficient-wise multiplication
+    residual = residual.array()*residual.array();
+    rmse += residual;
+  }
+
+  //calculate the mean
+  rmse = rmse/estimations.size();
+
+  //calculate the squared root
+  rmse = rmse.array().sqrt();
+
+  //return the result
+  return rmse;
 }
 
 MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
@@ -75,4 +74,19 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
 		  py*(vx*py - vy*px)/c3, px*(px*vy - py*vx)/c3, px/c2, py/c2;
 
 	return Hj;
+}
+
+// From: http://stackoverflow.com/a/29871193/1321129
+/* change to `float/fmodf` or `long double/fmodl` or `int/%` as appropriate */
+/* wrap x -> [0,max) */
+double Tools::wrapMax(double x, double max)
+{
+  /* integer math: `(max + x % max) % max` */
+  return fmod(max + fmod(x, max), max);
+}
+
+/* wrap x -> [min,max) */
+double Tools::wrapMinMax(double x, double min, double max)
+{
+  return min + wrapMax(x - min, max - min);
 }

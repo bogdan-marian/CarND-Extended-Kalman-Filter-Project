@@ -29,6 +29,8 @@ public:
   */
   MatrixXd CalculateJacobian(const VectorXd& x_state);
 
+  double wrapMax(double x, double max);
+  double wrapMinMax(double x, double min, double max);
 };
 
 #endif /* TOOLS_H_ */
