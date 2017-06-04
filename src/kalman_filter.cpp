@@ -49,9 +49,23 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   /**
     * update the state by using Extended Kalman Filter equations
   */
-  VectorXd z_pred = tools.CalculateJacobian(x_);
+
+  //h(x') is z_pred
+
+
+  VectorXd z_pred = tools.CalculateNonlinearH(x_);
   VectorXd y = z - z_pred;
-  y(1) = tools.wrapMinMax(y(1), -M_PI, M_PI);
+
+  //make sure the radial angles are in range (-pi, pi)
+  while (y(1)>M_PI)
+	{
+		y(1) -= 2 * M_PI;
+	}
+	while (y(1)<-M_PI)
+	{
+		y(1) += 2 * M_PI;
+	}
+
   MatrixXd Ht = H_.transpose();
   MatrixXd S = H_ * P_ * Ht + R_;
   MatrixXd Si = S.inverse();

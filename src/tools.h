@@ -24,13 +24,16 @@ public:
   */
   VectorXd CalculateRMSE(const vector<VectorXd> &estimations, const vector<VectorXd> &ground_truth);
 
-  /**
-  * A helper method to calculate Jacobians.
-  */
+
   MatrixXd CalculateJacobian(const VectorXd& x_state);
 
-  double wrapMax(double x, double max);
-  double wrapMinMax(double x, double min, double max);
+
+  Eigen::VectorXd CalculateNonlinearH(const Eigen::VectorXd& x_state);
+
+  /**
+  * Converts Polar coordonates to Cartesian ones
+  */
+  VectorXd PolarToCart(const VectorXd& x_state);
 };
 
 #endif /* TOOLS_H_ */
